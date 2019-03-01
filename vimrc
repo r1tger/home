@@ -220,11 +220,12 @@ set completeopt+=menuone,noinsert,noselect " Don't add 'longest', breaks dict
 let g:mucomplete#enable_auto_at_startup = 1
 
 let g:mucomplete#chains = {
-  \ 'default' : ['path', 'ulti', 'omni', 'tags', 'keyn'],
-  \ 'css'     : ['path', 'omni', 'keyn'],
-  \ 'markdown': ['path', 'ulti', 'keyn', 'dict', 'uspl'],
-  \ 'text'    : ['uspl', 'keyn'],
-  \ 'vim'     : ['path', 'cmd', 'keyn']
+  \ 'default' : ['path', 'ulti', 'omni', 'tags', 'incl'],
+  \ 'css'     : ['path', 'omni', 'incl'],
+  \ 'markdown': ['path', 'ulti', 'incl', 'dict', 'uspl'],
+  \ 'text'     : ['path', 'ulti', 'incl'],
+  \ 'tex'     : ['path', 'ulti', 'incl'],
+  \ 'vim'     : ['path', 'cmd', 'tags', 'keyn']
   \ }
 
 " -----------------------------------------------------------------------------
