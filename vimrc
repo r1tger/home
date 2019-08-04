@@ -14,19 +14,18 @@ Plugin 'davidhalter/jedi-vim'
 Plugin 'elmcast/elm-vim'
 Plugin 'fholgado/minibufexpl.vim'
 Plugin 'honza/vim-snippets'
-Plugin 'jnurmine/Zenburn'
+Plugin 'kristijanhusak/vim-hybrid-material'
+Plugin 'lervag/vimtex'
 Plugin 'lifepillar/vim-mucomplete'
 Plugin 'ludovicchabant/vim-gutentags'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
-"Plugin 'scrooloose/syntastic'
-Plugin 'w0rp/ale'
 Plugin 'SirVer/ultisnips'
 Plugin 'tpope/vim-dispatch'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-sensible'
 Plugin 'unblevable/quick-scope'
-Plugin 'w0ng/vim-hybrid'
+Plugin 'w0rp/ale'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -56,7 +55,8 @@ set t_Co=256
 
 " Custom colour scheme
 set background=dark
-colorscheme hybrid
+let g:enable_bold_font = 1
+colorscheme hybrid_reverse
 
 augroup vimrc
     autocmd!
@@ -275,7 +275,7 @@ let g:jedi#popup_on_dot=0
 " vim-dispatch
 " -----------------------------------------------------------------------------
 
-nnoremap <F9> :Dispatch<CR>
+nnoremap <F9> :Dispatch!<CR>
 
 " -----------------------------------------------------------------------------
 " Strip whitespace on save
