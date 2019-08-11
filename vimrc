@@ -12,13 +12,15 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'davidhalter/jedi-vim'
 Plugin 'elmcast/elm-vim'
-Plugin 'fholgado/minibufexpl.vim'
 Plugin 'honza/vim-snippets'
+Plugin 'itchyny/lightline.vim'
 Plugin 'kristijanhusak/vim-hybrid-material'
 Plugin 'lervag/vimtex'
 Plugin 'lifepillar/vim-mucomplete'
 Plugin 'ludovicchabant/vim-gutentags'
 Plugin 'majutsushi/tagbar'
+Plugin 'maximbaz/lightline-ale'
+Plugin 'mengelbrecht/lightline-bufferline'
 Plugin 'scrooloose/nerdtree'
 Plugin 'SirVer/ultisnips'
 Plugin 'tpope/vim-dispatch'
@@ -26,6 +28,7 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-sensible'
 Plugin 'unblevable/quick-scope'
 Plugin 'w0rp/ale'
+Plugin 'niklaas/lightline-gitdiff'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -109,8 +112,6 @@ set incsearch  " Find the next match as we type the search¶
 set ignorecase " Ignore case when searching or substituting¶
 set hlsearch   " Highlight searches by default¶
 
-set laststatus=2 " Always display status line
-
 " Change leader key
 let mapleader="\<Space>"
 
@@ -127,6 +128,10 @@ augroup END
 " Format the current paragraph
 nnoremap <Leader>f gqap
 
+" Remap buffer switching
+nmap <silent> <Leader>l :bn<CR>
+nmap <silent> <Leader>h :bp<CR>
+
 " -----------------------------------------------------------------------------
 " Spelling
 " -----------------------------------------------------------------------------
@@ -141,43 +146,85 @@ autocmd FileType markdown,text setlocal complete+=k/usr/share/dict/words
 " Status line
 " -----------------------------------------------------------------------------
 
-"status line setup
-set statusline=%f "tail of the filename
+" Hide mode indicator
+set noshowmode
+" Always show tabline
+set showtabline=2
 
-"display a warning if file format isn't Unix
-set statusline+=%#warningmsg#
-set statusline+=%{&ff!='unix'?'['.&ff.']':''}
-set statusline+=%*
+" Refresh the statusline when GutenTags is done
+augroup LightlineGutentags
+    autocmd!
+    autocmd User GutentagsUpdating call lightline#update()
+    autocmd User GutentagsUpdated call lightline#update()
+augroup END
+autocmd BufWritePost,TextChanged,TextChangedI * call lightline#update()
 
-"display a warning if file encoding isnt utf-8
-set statusline+=%#warningmsg#
-set statusline+=%{(&fenc!='utf-8'&&&fenc!='')?'['.&fenc.']':''}
-set statusline+=%*
+" Lightline configuration
+let g:lightline = {
+    \ 'colorscheme': 'wombat',
+    \ 'active': {
+    \     'left': [ [ 'mode', 'paste' ],
+    \               [ 'gitbranch', 'gitdiff', 'readonly', 'filename', 'modified',
+    \                 'gutentag', 'tagbar' ], ],
+    \     'right': [ [ 'linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok' ],
+    \              [ 'lineinfo' ], [ 'percent' ],
+    \              [ 'highlight', 'fileformat', 'fileencoding', 'filetype' ], ],
+    \ },
+    \ 'tabline': {
+    \     'left': [ [ 'buffers' ] ],
+    \     'right': [ [ 'close' ] ],
+    \ },
+    \ 'component': {
+    \     'tagbar': '%{tagbar#currenttag("%s", "No context", "f")}',
+    \     'lineinfo': ' %3l:%-2v',
+    \ },
+    \ 'component_function': {
+    \     'gitbranch': 'LightlineFugitive',
+    \     'gitdiff': 'lightline#gitdiff#get',
+    \     'highlight': 'LightlineCurrentHighlight',
+    \     'gutentag': 'gutentags#statusline',
+    \ },
+    \ 'component_expand': {
+    \     'buffers': 'lightline#bufferline#buffers',
+    \     'linter_checking': 'lightline#ale#checking',
+    \     'linter_warnings': 'lightline#ale#warnings',
+    \     'linter_errors': 'lightline#ale#errors',
+    \     'linter_ok': 'lightline#ale#ok',
+    \ },
+    \ 'component_type': {
+    \     'buffers': 'tabsel',
+    \     'linter_checking': 'left',
+    \     'linter_warnings': 'warning',
+    \     'linter_errors': 'error',
+    \     'linter_ok': 'left',
+    \     'gitdiff': 'middle',
+    \ },
+    \ 'separator': { 'left': '', 'right': '' },
+    \ 'subseparator': { 'left': '', 'right': '' },
+    \ }
 
-set statusline+=%h "help file flag
-set statusline+=%y "filetype
-set statusline+=%r "read only flag
-set statusline+=%m "modified flag
+" Remove path from tabline filenames
+let g:lightline#bufferline#filename_modifier = ':t'
+" Set git diff display
+let g:lightline#gitdiff#indicator_added = 'A:'
+let g:lightline#gitdiff#indicator_deleted = 'D:'
+let g:lightline#gitdiff#indicator_modified = 'M:'
 
-"display a warning if &paste is set
-set statusline+=%#error#
-set statusline+=%{&paste?'[paste]':''}
-set statusline+=%*
-
-set statusline+=%= "left/right separator
-set statusline+=%{gutentags#statusline('[Generating...]')}
-set statusline+=%{StatuslineCurrentHighlight()}\ \ "current highlight
-set statusline+=%c, "cursor column
-set statusline+=%l/%L "cursor line/total lines
-set statusline+=\ %P "percent through file
+function! LightlineFugitive()
+    if exists('*fugitive#head')
+        let branch = fugitive#head()
+        return branch !=# '' ? ' '.branch : ''
+    endif
+    return ''
+endfunction
 
 " Return the syntax highlight group under the cursor ''
-function! StatuslineCurrentHighlight()
+function! LightlineCurrentHighlight()
     let name = synIDattr(synID(line('.'),col('.'),1),'name')
     if name == ''
         return ''
     else
-        return '[' . name . ']'
+        return name
     endif
 endfunction
 
@@ -251,14 +298,6 @@ let g:gutentags_project_root=['pip-selfcheck.json'] " enable for virtualenv
 nmap <silent> <Leader>t :TagbarToggle<CR>
 
 " -----------------------------------------------------------------------------
-" minibufexpl
-" -----------------------------------------------------------------------------
-
-nmap <silent> <Leader>b :MBEFocus<CR>
-nmap <silent> <Leader>l :MBEbn<CR>
-nmap <silent> <Leader>h :MBEbp<CR>
-
-" -----------------------------------------------------------------------------
 " NerdTree
 " -----------------------------------------------------------------------------
 
@@ -269,7 +308,7 @@ nmap <silent> <Leader>p :NERDTreeToggle<CR>
 " -----------------------------------------------------------------------------
 
 " Let vim-mucomplete handle autocompletion
-let g:jedi#popup_on_dot=0
+let g:jedi#popup_on_dot=1
 
 " -----------------------------------------------------------------------------
 " vim-dispatch
