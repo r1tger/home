@@ -21,6 +21,7 @@ Plugin 'ludovicchabant/vim-gutentags'
 Plugin 'majutsushi/tagbar'
 Plugin 'maximbaz/lightline-ale'
 Plugin 'mengelbrecht/lightline-bufferline'
+Plugin 'niklaas/lightline-gitdiff'
 Plugin 'scrooloose/nerdtree'
 Plugin 'SirVer/ultisnips'
 Plugin 'tpope/vim-dispatch'
@@ -28,7 +29,6 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-sensible'
 Plugin 'unblevable/quick-scope'
 Plugin 'w0rp/ale'
-Plugin 'niklaas/lightline-gitdiff'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -67,16 +67,6 @@ augroup vimrc
     autocmd ColorScheme * hi! MatchParen guifg=#81a2be ctermfg=110 guibg=NONE ctermbg=NONE gui=NONE,bold cterm=NONE,bold term=NONE,bold
 augroup END
 
-" Window controls
-noremap <C-h> <C-W>h
-noremap <C-k> <C-W>k
-noremap <C-l> <C-W>l
-noremap <C-j> <C-W>j
-
-" Remap parens to make paragraph navigation work with Space Cadet
-nnoremap ( {
-nnoremap ) }
-
 syntax on
 set hidden
 
@@ -112,9 +102,6 @@ set incsearch  " Find the next match as we type the search¶
 set ignorecase " Ignore case when searching or substituting¶
 set hlsearch   " Highlight searches by default¶
 
-" Change leader key
-let mapleader="\<Space>"
-
 " Encrypt/decrypt files
 command! -nargs=1 WriteEncrypted w !openssl enc -aes-256-cbc -a -salt -out <q-args>
 command! Password r !openssl rand -base64 12
@@ -124,6 +111,23 @@ augroup myvimrc
     au!
     au BufWritePost .vimrc,_vimrc,vimrc,.gvimrc,_gvimrc,gvimrc so $MYVIMRC | if has('gui_running') | so $MYGVIMRC | endif
 augroup END
+
+" -----------------------------------------------------------------------------
+" Mappings
+" -----------------------------------------------------------------------------
+
+" Change leader key
+let mapleader="\<Space>"
+
+" Window controls
+noremap <C-h> <C-W>h
+noremap <C-k> <C-W>k
+noremap <C-l> <C-W>l
+noremap <C-j> <C-W>j
+
+" Remap parens to make paragraph navigation work with Space Cadet
+nnoremap ( {
+nnoremap ) }
 
 " Format the current paragraph
 nnoremap <Leader>f gqap
@@ -246,14 +250,9 @@ let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 
-" -----------------------------------------------------------------------------
-" Syntastic
-" -----------------------------------------------------------------------------
-
-let g:syntastic_always_populate_loc_list=1
-let g:syntastic_auto_loc_list=1
-let g:syntastic_check_on_open=1
-let g:syntastic_check_on_wq=0
+" Jump to previous/next issue
+nmap <silent> <Leader>j :ALENext<CR>
+nmap <silent> <Leader>k :ALEPrevious<CR>
 
 " -----------------------------------------------------------------------------
 " vim-mucomplete
@@ -267,13 +266,9 @@ set completeopt+=menuone,noinsert,noselect " Don't add 'longest', breaks dict
 let g:mucomplete#enable_auto_at_startup = 1
 
 let g:mucomplete#chains = {
-  \ 'default' : ['path', 'ulti', 'omni', 'tags', 'incl'],
-  \ 'css'     : ['path', 'omni', 'incl'],
-  \ 'markdown': ['path', 'ulti', 'incl', 'dict', 'uspl'],
-  \ 'text'     : ['path', 'ulti', 'incl'],
-  \ 'tex'     : ['path', 'ulti', 'incl'],
-  \ 'vim'     : ['path', 'cmd', 'tags', 'keyn']
-  \ }
+    \ 'default' : ['path', 'omni', 'keyn', 'tags', 'ulti', 'incl', 'dict', 'uspl'],
+    \ 'vim'     : ['path', 'cmd', 'tags', 'keyn'],
+    \ }
 
 " -----------------------------------------------------------------------------
 " UltiSnips
